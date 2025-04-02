@@ -1,0 +1,51 @@
+// === Anchor Engine Core Scaffold ===
+// Runtime: Perceptual Alignment Logic
+// Version: 0.1 (Non-commercial prototype)
+
+pub struct AnchorState {
+    pub anchor_a: f64, // e.g. Fear
+    pub anchor_b: f64, // e.g. Safety
+    pub drift: f64,
+    pub impact: f64,
+    pub chaos_variance: f64,
+    pub last_choice: f64,
+}
+
+impl AnchorState {
+    pub fn init(a: f64, b: f64, variance: f64) -> Self {
+        Self {
+            anchor_a: a,
+            anchor_b: b,
+            drift: 0.0,
+            impact: 0.0,
+            chaos_variance: variance,
+            last_choice: 0.0,
+        }
+    }
+
+    pub fn collapse(&mut self, input: f64, time: f64) -> f64 {
+        let midpoint = (self.anchor_a + self.anchor_b) / 2.0;
+        let adjusted = input + time;
+        let output = (adjusted - midpoint).tanh(); // logistic-style collapse
+        self.last_choice = output;
+        self.impact = output.abs();
+        output
+    }
+
+    pub fn update_drift(&mut self, observed: f64) {
+        self.drift = (self.last_choice - observed).abs();
+        if self.drift > self.chaos_variance {
+            self.realign();
+        }
+    }
+
+    fn realign(&mut self) {
+        // Basic perceptual anchor correction
+        self.anchor_a *= 0.99;
+        self.anchor_b *= 1.01;
+    }
+
+    pub fn report(&self) {
+        println!("Drift: {}", self.drift);
+        println!("Impact: {}", self.impact);
+    }

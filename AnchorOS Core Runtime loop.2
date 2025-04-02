@@ -1,0 +1,81 @@
+// === AnchorOS™ Runtime v0.1 ===
+// Core perceptual runtime loop (licensed logic)
+// Copy-safe for testing / Notepad storage
+
+const PASSWORD: &str = "YOUR_SECRET_KEY";
+
+pub struct AnchorState {
+    pub anchor_a: f64, // Perceptual Anchor (e.g., Fear)
+    pub anchor_b: f64, // Perceptual Anchor (e.g., Safety)
+    pub drift: f64,
+    pub impact: f64,
+    pub chaos_variance: f64,
+    pub last_choice: f64,
+    pub unlocked: bool,
+}
+
+impl AnchorState {
+    pub fn init(a: f64, b: f64, variance: f64, input_password: &str) -> Self {
+        let unlocked = input_password == PASSWORD;
+        if unlocked {
+            println!("AnchorOS™ Runtime Unlocked.");
+        } else {
+            println!("Running in Dummy Mode. Licensing required.");
+        }
+
+        Self {
+            anchor_a: a,
+            anchor_b: b,
+            drift: 0.0,
+            impact: 0.0,
+            chaos_variance: variance,
+            last_choice: 0.0,
+            unlocked,
+        }
+    }
+
+    pub fn collapse(&mut self, input: f64, time: f64) -> f64 {
+        if !self.unlocked {
+            return 0.0; // Dummy mode
+        }
+
+        let midpoint = (self.anchor_a + self.anchor_b) / 2.0;
+        let adjusted = input + time;
+        let output = (adjusted - midpoint).tanh(); // Collapse function
+        self.last_choice = output;
+        self.impact = output.abs();
+        output
+    }
+
+    pub fn update_drift(&mut self, observed: f64) {
+        if !self.unlocked {
+            return;
+        }
+
+        self.drift = (self.last_choice - observed).abs();
+        if self.drift > self.chaos_variance {
+            self.realign();
+        }
+    }
+
+    fn realign(&mut self) {
+        // Minimal anchor calibration
+        self.anchor_a *= 0.99;
+        self.anchor_b *= 1.01;
+    }
+
+    pub fn report(&self) {
+        println!("[ANCHOROS STATUS]");
+        println!("Unlocked: {}", self.unlocked);
+        println!("Drift: {}", self.drift);
+        println!("Impact: {}", self.impact);
+        println!("Anchor A: {}", self.anchor_a);
+        println!("Anchor B: {}", self.anchor_b);
+    }
+}
+
+// === Example Use ===
+// let mut engine = AnchorState::init(0.2, 0.8, 0.15, "YOUR_SECRET_KEY");
+// let decision = engine.collapse(0.4, 1.0);
+// engine.update_drift(0.3);
+// engine.report();

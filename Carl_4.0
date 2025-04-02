@@ -1,0 +1,26 @@
+class AnchorAgent:
+    def __init__(self, name, base_vector, environment_effects):
+        self.name = name
+        self.anchor_vector = base_vector  # {'Fear': F, 'Safety': S, 'Time': T, 'Choice': C}
+        self.environment_effects = environment_effects  # container: anchor deltas
+        self.why_scalar = self._calculate_why()
+    
+    def _calculate_why(self):
+        return round(self.anchor_vector["Time"] * self.anchor_vector["Choice"], 4)
+
+    def apply_environment(self, container_name):
+        effects = self.environment_effects.get(container_name, {})
+        for anchor in self.anchor_vector:
+            self.anchor_vector[anchor] = max(0.0, min(1.0, self.anchor_vector[anchor] + effects.get(anchor, 0.0)))
+        self.why_scalar = self._calculate_why()
+
+    def collapse_ready(self, collapse_threshold=0.15, fear_threshold=0.7):
+        return self.why_scalar > collapse_threshold and self.anchor_vector["Fear"] > fear_threshold
+
+    def summary(self):
+        return {
+            "Agent": self.name,
+            "Anchor Vector": self.anchor_vector,
+            "Why Scalar (W = T × C)": self.why_scalar,
+            "Collapse Risk": self.collapse_ready()
+        }

@@ -1,0 +1,54 @@
+class CognitiveBridge:
+    def __init__(self, anchor_vector, environment, memory_field):
+        self.anchor_vector = anchor_vector  # ⟨F, S, T, C⟩
+        self.environment = environment      # Environmental containers
+        self.memory_field = memory_field    # Memory echoes or triggers
+        self.why_scalar = self._calculate_why()
+
+    def _calculate_why(self):
+        return round(self.anchor_vector["Time"] * self.anchor_vector["Choice"], 4)
+
+    def receive_fact(self, ai_output):
+        """
+        Accepts a fact from an AI model.
+        Example: {'type': 'financial', 'statement': 'You spent $432 on food last month'}
+        """
+        return self._contextualize_fact(ai_output)
+
+    def _contextualize_fact(self, fact):
+        """
+        Converts raw data into emotional/environmental ripple.
+        Uses environment and memory to weight it.
+        """
+        ripple_strength = self._calculate_ripple(fact)
+        drift_result = self._apply_to_anchor_vector(ripple_strength)
+        self.why_scalar = self._calculate_why()
+        return {
+            "anchor_shift": drift_result,
+            "why_scalar": self.why_scalar,
+            "collapse_risk": self._predict_collapse(drift_result)
+        }
+
+    def _calculate_ripple(self, fact):
+        """
+        Checks if fact aligns with any memory container, environmental stressor,
+        or existing drift direction. Returns weighted vector influence.
+        """
+        if "spent" in fact.get("statement", ""):
+            return {"Fear": +0.1, "Safety": -0.1, "Time": +0.05, "Choice": -0.02}
+        return {"Fear": 0, "Safety": 0, "Time": 0, "Choice": 0}
+
+    def _apply_to_anchor_vector(self, ripple):
+        """
+        Applies ripple weights to current ⟨F, S, T, C⟩ vector.
+        """
+        for anchor in self.anchor_vector:
+            self.anchor_vector[anchor] += ripple.get(anchor, 0)
+            self.anchor_vector[anchor] = max(0.0, min(1.0, self.anchor_vector[anchor]))  # clamp [0–1]
+        return self.anchor_vector
+
+    def _predict_collapse(self, updated_vector):
+        """
+        Uses logistic threshold or tuned equation to predict if collapse is likely.
+        """
+        return self.why_scalar > 0.15 and updated_vector["Fear"] > 0.7
