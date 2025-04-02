@@ -2,14 +2,18 @@ import streamlit as st
 
 st.title("🧠 Carl 4.0 — Perception Dashboard")
 st.subheader("Anchor Vector ⟨F, S, T, C⟩ | WHY Scalar | Collapse Risk")
+if "fear" not in st.session_state:
+    st.session_state.fear = 0.42
+    st.session_state.safety = 0.55
+    st.session_state.time = 0.31
+    st.session_state.choice = 0.38
 
 # Anchor Vector Sliders
 st.sidebar.header("Adjust Anchor Values")
-fear = st.sidebar.slider("Fear", 0.0, 1.0, 0.42)
-safety = st.sidebar.slider("Safety", 0.0, 1.0, 0.55)
-time = st.sidebar.slider("Time", 0.0, 1.0, 0.31)
-choice = st.sidebar.slider("Choice", 0.0, 1.0, 0.38)
-
+fear = st.sidebar.slider("Fear", 0.0, 1.0, st.session_state.fear, 0.01)
+safety = st.sidebar.slider("Safety", 0.0, 1.0, st.session_state.safety, 0.01)
+time = st.sidebar.slider("Time", 0.0, 1.0, st.session_state.time, 0.01)
+choice = st.sidebar.slider("Choice", 0.0, 1.0, st.session_state.choice, 0.01)
 # WHY Scalar
 why = round(time * choice, 4)
 
@@ -41,20 +45,18 @@ st.write({
 # Ripple Triggers
 st.write("### Trigger Events")
 if st.button("🌩️ Storm Begins"):
-    fear += 0.15
-    safety -= 0.2
-    time += 0.25
-    choice -= 0.1
-    st.experimental_rerun()
+    st.session_state.fear = min(st.session_state.fear + 0.15, 1.0)
+    st.session_state.safety = max(st.session_state.safety - 0.2, 0.0)
+    st.session_state.time = min(st.session_state.time + 0.25, 1.0)
+    st.session_state.choice = max(st.session_state.choice - 0.1, 0.0)
 
 if st.button("❤️ Mira Appears"):
-    fear -= 0.2
-    safety += 0.25
-    choice += 0.15
-    st.experimental_rerun()
+    st.session_state.fear = max(st.session_state.fear - 0.2, 0.0)
+    st.session_state.safety = min(st.session_state.safety + 0.25, 1.0)
+    st.session_state.choice = min(st.session_state.choice + 0.15, 1.0)
 
 if st.button("🗣️ Player says 'Where’s the dungeon?'"):
-    fear += 0.3
-    time += 0.2
-    choice += 0.2
-    st.experimental_rerun()
+    st.session_state.fear = min(st.session_state.fear + 0.3, 1.0)
+    st.session_state.time = min(st.session_state.time + 0.2, 1.0)
+    st.session_state.choice = min(st.session_state.choice + 0.2, 1.0)
+
