@@ -1,62 +1,95 @@
+# Carl 5.0 Perceptual Engine GUI (streamlit)
 import streamlit as st
 
-st.title("🧠 Carl 4.0 — Perception Dashboard")
-st.subheader("Anchor Vector ⟨F, S, T, C⟩ | WHY Scalar | Collapse Risk")
-if "fear" not in st.session_state:
-    st.session_state.fear = 0.42
-    st.session_state.safety = 0.55
-    st.session_state.time = 0.31
-    st.session_state.choice = 0.38
+# --- Persistent State Initialization ---
+if "Fear" not in st.session_state:
+    st.session_state.Fear = 0.42
+    st.session_state.Safety = 0.55
+    st.session_state.Time = 0.31
+    st.session_state.Choice = 0.38
+    st.session_state.W = round(st.session_state.Time * st.session_state.Choice, 4)
+    st.session_state.Physical = {"mobility": "limited", "limitation": "missing eye"}
+    st.session_state.Goal = "Take over the smithy as master ages out"
+    st.session_state.AM_decision = "WAIT"
+    st.session_state.memory_log = []
+    st.session_state.npc_influence = []
+    st.session_state.container = "Pub"
+    st.session_state.behavior_log = []
 
-# Anchor Vector Sliders
-st.sidebar.header("Adjust Anchor Values")
-fear = st.sidebar.slider("Fear", 0.0, 1.0, st.session_state.fear, 0.01)
-safety = st.sidebar.slider("Safety", 0.0, 1.0, st.session_state.safety, 0.01)
-time = st.sidebar.slider("Time", 0.0, 1.0, st.session_state.time, 0.01)
-choice = st.sidebar.slider("Choice", 0.0, 1.0, st.session_state.choice, 0.01)
-# WHY Scalar
-why = round(time * choice, 4)
+st.set_page_config(layout="wide")
+st.title("🧠 Carl 5.0 — Full Perceptual Engine GUI")
+st.caption("Real-time cognitive simulation with memory, identity, drift, and goal pressure")
 
-# Collapse Status Logic
-def collapse_status(fear, safety, why):
-    if why > 0.25 and fear > 0.8:
-        return "⚫ Decoherence", "black"
-    elif why > 0.15 and fear > 0.6:
-        return "🔴 Collapse Risk", "red"
-    elif why > 0.10:
-        return "🟡 Drifting", "orange"
+# --- Anchor Vector Sliders ---
+st.sidebar.header("Core Anchor Vector (F/S/T/C)")
+fear = st.sidebar.slider("Fear", 0.0, 1.0, st.session_state.Fear, 0.01,
+                         help="Emotional instability or perceived threat")
+safety = st.sidebar.slider("Safety", 0.0, 1.0, st.session_state.Safety, 0.01,
+                           help="Sense of stability and internal calm")
+time = st.sidebar.slider("Time", 0.0, 1.0, st.session_state.Time, 0.01,
+                         help="Urgency or external pressure to act")
+choice = st.sidebar.slider("Choice", 0.0, 1.0, st.session_state.Choice, 0.01,
+                           help="Confidence or perceived freedom to act")
+
+# --- Recalculate W (G = Goal Pressure) ---
+G = round(time * choice, 4)
+st.session_state.W = G
+
+# --- A&M Gateway Logic ---
+if G > 0.6 and fear > safety:
+    am_decision = "ACT"
+elif G > 0.3 and safety > fear:
+    am_decision = "MEASURE"
+else:
+    am_decision = "WAIT"
+st.session_state.AM_decision = am_decision
+
+# --- Layout ---
+left, right = st.columns([2, 2])
+with left:
+    st.subheader("🧭 Live Cognitive State")
+    st.metric("Goal Pressure (G = T × C)", G)
+    st.metric("A&M Gateway", st.session_state.AM_decision)
+    st.metric("Container", st.session_state.container)
+    st.markdown(f"**Goal:** {st.session_state.Goal}")
+    st.markdown(f"**Physical Limitation:** {st.session_state.Physical['limitation']}")
+
+    st.subheader("📦 Memory Cache")
+    for mem in st.session_state.memory_log[-3:]:
+        st.markdown(f"- {mem}")
+
+    st.subheader("👣 Behavior Log")
+    for b in st.session_state.behavior_log[-3:]:
+        st.markdown(f"- {b}")
+
+with right:
+    st.subheader("👥 NPC Influence (Toggle Presence)")
+    for npc in ["Mira", "Bran", "Steve", "Jessa", "Orlin"]:
+        if st.checkbox(f"{npc} Nearby"):
+            if npc not in st.session_state.npc_influence:
+                st.session_state.npc_influence.append(npc)
+            st.markdown(f"✅ {npc} is affecting Carl")
+        else:
+            if npc in st.session_state.npc_influence:
+                st.session_state.npc_influence.remove(npc)
+
+    st.subheader("🦿 Physical Container Status")
+    if G > 0.6:
+        st.markdown("⚠️ **Hesitant movement** detected (Goal pressure high)")
+    elif G < 0.2:
+        st.markdown("✅ **Fluid movement** — Carl is stable")
     else:
-        return "🟢 Stable", "green"
+        st.markdown("🔄 **Neutral stance** — Monitoring")
 
-status, color = collapse_status(fear, safety, why)
+# --- Impact Button ---
+if st.button("🧭 Carl says: 'Impact' (Recalibrate)"):
+    st.session_state.Fear = max(fear - 0.1, 0.0)
+    st.session_state.Choice = min(choice + 0.2, 1.0)
+    st.session_state.Safety = min(safety + 0.1, 1.0)
+    st.session_state.behavior_log.append("Carl recalibrated via Impact.")
 
-# Display Metrics
-st.metric(label="WHY Scalar (W = T × C)", value=why)
-st.markdown(f"### Collapse State: <span style='color:{color}'>{status}</span>", unsafe_allow_html=True)
-
-st.write("### Anchor Vector")
-st.write({
-    "Fear": fear,
-    "Safety": safety,
-    "Time": time,
-    "Choice": choice
-})
-
-# Ripple Triggers
-st.write("### Trigger Events")
-if st.button("🌩️ Storm Begins"):
-    st.session_state.fear = min(st.session_state.fear + 0.15, 1.0)
-    st.session_state.safety = max(st.session_state.safety - 0.2, 0.0)
-    st.session_state.time = min(st.session_state.time + 0.25, 1.0)
-    st.session_state.choice = max(st.session_state.choice - 0.1, 0.0)
-
-if st.button("❤️ Mira Appears"):
-    st.session_state.fear = max(st.session_state.fear - 0.2, 0.0)
-    st.session_state.safety = min(st.session_state.safety + 0.25, 1.0)
-    st.session_state.choice = min(st.session_state.choice + 0.15, 1.0)
-
-if st.button("🗣️ Player says 'Where’s the dungeon?'"):
-    st.session_state.fear = min(st.session_state.fear + 0.3, 1.0)
-    st.session_state.time = min(st.session_state.time + 0.2, 1.0)
-    st.session_state.choice = min(st.session_state.choice + 0.2, 1.0)
-
+# --- Update Session Values ---
+st.session_state.Fear = fear
+st.session_state.Safety = safety
+st.session_state.Time = time
+st.session_state.Choice = choice
