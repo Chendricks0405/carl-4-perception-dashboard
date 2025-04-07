@@ -1,8 +1,8 @@
 #bash
 
-AnchorOS-Carl/
+AnchorOS-/
 ├── core/
-│   └── Carl_v6.py             # Original runtime logic
+│   └── Anchor_v6.py             # Original runtime logic
 ├── bridge/
 │   └── bridge.py              # The bridge layer you just wrote
 ├── memory/

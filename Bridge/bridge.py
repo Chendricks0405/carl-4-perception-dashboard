@@ -1,11 +1,10 @@
-# bridge.py
-
+from anchor import run_drift_tick
 import uuid
 from typing import Dict, Any
 
 def parse_input(input_data: str) -> Dict[str, Any]:
     """
-    Interpret input string and generate updates to Carl’s state.
+    Interpret input string and generate updates to Anchor1’s state.
     """
     response = {
         "anchor_deltas": {"Fear": 0.0, "Safety": 0.0, "Time": 0.0, "Choice": 0.0},
@@ -32,7 +31,7 @@ def parse_input(input_data: str) -> Dict[str, Any]:
 
 def apply_anchor_deltas(core, deltas: Dict[str, float]):
     """
-    Apply deltas to Carl's core state with clamping between [0, 1].
+    Apply deltas to Anchor1's core state with clamping between [0, 1].
     """
     for k, v in deltas.items():
         if k in core:
@@ -50,9 +49,9 @@ def trigger_memory(memory_orbit, memory_id: str):
             triggered.append(mem)
     return triggered
 
-def get_carl_state(session) -> Dict[str, Any]:
+def get_anchor_state(session) -> Dict[str, Any]:
     """
-    Extract Carl's internal state for external use.
+    Extract Anchor1's internal state for external use.
     """
     return {
         "id": str(uuid.uuid4()),
@@ -69,7 +68,7 @@ def get_carl_state(session) -> Dict[str, Any]:
 
 def bridge_input(session, input_data: str) -> Dict[str, Any]:
     """
-    Full bridge handler — receives input, modifies state, and returns Carl's updated state.
+    Full bridge handler — receives input, modifies state, and returns Anchor1's updated state.
     """
     parsed = parse_input(input_data)
 
@@ -88,4 +87,4 @@ def bridge_input(session, input_data: str) -> Dict[str, Any]:
         log_entry += f" | Memory Reactivated: {', '.join([m['id'] for m in triggered])}"
     session.behavior_log.append(log_entry)
 
-    return get_carl_state(session)
+    return get_anchor_state(session)
