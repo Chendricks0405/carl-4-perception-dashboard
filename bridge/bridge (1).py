@@ -1,11 +1,9 @@
-from anchor import run_drift_tick
+
+from anchor_core_engine import run_drift_tick
 import uuid
 from typing import Dict, Any
 
 def parse_input(input_data: str) -> Dict[str, Any]:
-    """
-    Interpret input string and generate updates to Anchor1’s state.
-    """
     response = {
         "anchor_deltas": {"Fear": 0.0, "Safety": 0.0, "Time": 0.0, "Choice": 0.0},
         "memory_trigger": None,
@@ -30,17 +28,11 @@ def parse_input(input_data: str) -> Dict[str, Any]:
     return response
 
 def apply_anchor_deltas(core, deltas: Dict[str, float]):
-    """
-    Apply deltas to Anchor1's core state with clamping between [0, 1].
-    """
     for k, v in deltas.items():
         if k in core:
             core[k] = max(0.0, min(1.0, core[k] + v))
 
 def trigger_memory(memory_orbit, memory_id: str):
-    """
-    Reactivate a memory if it's found.
-    """
     triggered = []
     for mem in memory_orbit:
         if mem["id"] == memory_id:
@@ -50,9 +42,6 @@ def trigger_memory(memory_orbit, memory_id: str):
     return triggered
 
 def get_anchor_state(session) -> Dict[str, Any]:
-    """
-    Extract Anchor1's internal state for external use.
-    """
     return {
         "id": str(uuid.uuid4()),
         "tick": session.ticks,
@@ -67,21 +56,15 @@ def get_anchor_state(session) -> Dict[str, Any]:
     }
 
 def bridge_input(session, input_data: str) -> Dict[str, Any]:
-    """
-    Full bridge handler — receives input, modifies state, and returns Anchor1's updated state.
-    """
     parsed = parse_input(input_data)
-
     apply_anchor_deltas(session.core, parsed["anchor_deltas"])
     
     triggered = []
     if parsed["memory_trigger"]:
         triggered = trigger_memory(session.memory_orbit, parsed["memory_trigger"])
 
-    # Force a drift tick update
     run_drift_tick()
-
-    # Attach log of updates
+    
     log_entry = f"[Bridge] Input: {input_data} → {', '.join(parsed['log'])}"
     if triggered:
         log_entry += f" | Memory Reactivated: {', '.join([m['id'] for m in triggered])}"
