@@ -1,57 +1,26 @@
-# Byte-compiled / optimized / DLL files
+# Python compiled files
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
+*.pyd
 
-# Virtual environments
-.env/
-.venv/
+# Python environment files
 env/
 venv/
-ENV/
+*.env
+*.venv
 
-# Distribution / packaging
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-*.whl
+# Private Anchor Core Engine
+anchor_core/
+anchor_core_engine.py
 
-# PyInstaller
-*.manifest
-*.spec
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints
 
-# Logs and temp files
-*.log
-*.tmp
-*.bak
-*.swp
-
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
-
-# VS Code and other editor configs
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-
-# OS generated
+# System files
 .DS_Store
 Thumbs.db
 
-# Zip and archives
-*.zip
-
-# Core logic placeholder
-core/anchor.py
+# Logs and databases
+*.log
+*.SQLite
